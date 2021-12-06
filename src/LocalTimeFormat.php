@@ -2,52 +2,15 @@
 
 namespace gipfl\Format;
 
-use DateTimeZone;
 use IntlDateFormatter;
-use IntlTimeZone;
 use RuntimeException;
-use function in_array;
 
 class LocalTimeFormat
 {
+    use LocaleAwareness;
+
     /** @var IntlDateFormatter */
     protected $formatter;
-
-    /** @var IntlDateFormatter */
-    protected $dayFormatter;
-
-    /** @var string */
-    protected $locale;
-
-    /** @var DateTimeZone|IntlTimeZone */
-    protected $timezone;
-
-    /**
-     * @param string $locale
-     * @return void
-     */
-    public function setLocale($locale)
-    {
-        if ($this->locale !== $locale) {
-            $this->locale = (string) $locale;
-            $this->reset();
-        }
-    }
-
-    /**
-     * @param DateTimeZone|IntlTimeZone $timezone
-     * @return void
-     */
-    public function setTimezone($timezone)
-    {
-        // Hint: type checking is delegated to timeZonesAreEqual
-        if (self::timeZonesAreEqual($this->timezone, $timezone)) {
-            return;
-        }
-
-        $this->timezone = $timezone;
-        $this->reset();
-    }
 
     /**
      * For available symbols please see:
@@ -70,15 +33,6 @@ class LocalTimeFormat
         }
 
         return $result;
-    }
-
-    /**
-     * @param $time
-     * @return string
-     */
-    public function getFullDay($time)
-    {
-        return $this->dayFormatter()->format($time);
     }
 
     /**
@@ -208,32 +162,6 @@ class LocalTimeFormat
         return $this->format($time, 'H:mm');
     }
 
-    protected function wantsAmPm()
-    {
-        // TODO: complete this list
-        return in_array($this->getLocale(), ['en_US', 'en_US.UTF-8']);
-    }
-
-    protected function isUsEnglish()
-    {
-        return in_array($this->getLocale(), ['en_US', 'en_US.UTF-8']);
-    }
-
-    protected static function timeZonesAreEqual($left, $right)
-    {
-        if ($left instanceof DateTimeZone) {
-            return $right instanceof DateTimeZone && $left->getName() === $right->getName();
-        }
-        if ($left instanceof IntlTimeZone) {
-            return $right instanceof IntlTimeZone && $left->getID() === $right->getID();
-        }
-
-        throw new RuntimeException(sprintf(
-            'Valid timezone expected, got %s',
-            is_object($right) ? get_class($right) : gettype($right)
-        ));
-    }
-
     protected function formatter($pattern)
     {
         if ($this->formatter === null) {
@@ -249,41 +177,8 @@ class LocalTimeFormat
         return $this->formatter;
     }
 
-    protected function dayFormatter()
-    {
-        if ($this->dayFormatter === null) {
-            $this->dayFormatter = new IntlDateFormatter(
-                $this->getLocale(),
-                IntlDateFormatter::FULL,
-                IntlDateFormatter::NONE
-            );
-            $this->dayFormatter->setTimeZone($this->getTimezone());
-        }
-
-        return $this->dayFormatter;
-    }
-
-    protected function getLocale()
-    {
-        if ($this->locale === null) {
-            $this->locale = setlocale(LC_TIME, 0) ?: 'C';
-        }
-
-        return $this->locale;
-    }
-
-    protected function getTimezone()
-    {
-        if ($this->timezone === null) {
-            $this->timezone = new DateTimeZone(date_default_timezone_get());
-        }
-
-        return $this->timezone;
-    }
-
     protected function reset()
     {
         $this->formatter = null;
-        $this->dayFormatter = null;
     }
 }
