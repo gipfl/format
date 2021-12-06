@@ -8,7 +8,7 @@ use IntlTimeZone;
 use RuntimeException;
 use function in_array;
 
-class LocalTime
+class LocalTimeFormat
 {
     /** @var IntlDateFormatter */
     protected $formatter;
@@ -22,10 +22,14 @@ class LocalTime
     /** @var DateTimeZone|IntlTimeZone */
     protected $timezone;
 
+    /**
+     * @param string $locale
+     * @return void
+     */
     public function setLocale($locale)
     {
         if ($this->locale !== $locale) {
-            $this->locale = $locale;
+            $this->locale = (string) $locale;
             $this->reset();
         }
     }
@@ -74,7 +78,7 @@ class LocalTime
      */
     public function getFullDay($time)
     {
-        return $this->dayFormatter->format($time);
+        return $this->dayFormatter()->format($time);
     }
 
     /**
@@ -238,14 +242,14 @@ class LocalTime
                 IntlDateFormatter::GREGORIAN,
                 IntlDateFormatter::GREGORIAN
             );
+            $this->formatter->setTimeZone($this->getTimezone());
         }
-        $this->formatter->setTimeZone($this->getTimezone());
         $this->formatter->setPattern($pattern);
 
         return $this->formatter;
     }
 
-    protected function dayFormatter($pattern)
+    protected function dayFormatter()
     {
         if ($this->dayFormatter === null) {
             $this->dayFormatter = new IntlDateFormatter(
@@ -253,9 +257,8 @@ class LocalTime
                 IntlDateFormatter::FULL,
                 IntlDateFormatter::NONE
             );
+            $this->dayFormatter->setTimeZone($this->getTimezone());
         }
-        $this->dayFormatter->setTimeZone($this->getTimezone());
-        $this->dayFormatter->setPattern($pattern);
 
         return $this->dayFormatter;
     }
