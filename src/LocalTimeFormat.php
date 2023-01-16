@@ -156,7 +156,7 @@ class LocalTimeFormat
     public function getShortTime($time)
     {
         if ($this->wantsAmPm()) {
-            return $this->format($time, 'h:mm a');
+            return $this->format($time, 'K:mm a');
         }
 
         return $this->format($time, 'H:mm');
