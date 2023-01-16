@@ -72,6 +72,12 @@ trait LocaleAwareness
 
     protected static function timeZonesAreEqual($left, $right)
     {
+        if ($left === null && $right !== null) {
+            return false;
+        }
+        if ($left !== null && $right === null) {
+            return false;
+        }
         if ($left instanceof DateTimeZone) {
             return $right instanceof DateTimeZone && $left->getName() === $right->getName();
         }
@@ -80,7 +86,8 @@ trait LocaleAwareness
         }
 
         throw new RuntimeException(sprintf(
-            'Valid timezone expected, got %s',
+            'Valid timezone expected, got left=%s, right=%s',
+            is_object($left) ? get_class($left) : gettype($left),
             is_object($right) ? get_class($right) : gettype($right)
         ));
     }
