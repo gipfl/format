@@ -4,6 +4,7 @@ namespace gipfl\Format;
 
 use DateTimeZone;
 use IntlTimeZone;
+use Locale;
 use RuntimeException;
 
 trait LocaleAwareness
@@ -55,7 +56,7 @@ trait LocaleAwareness
     protected function getLocale()
     {
         if ($this->locale === null) {
-            $this->locale = setlocale(LC_TIME, 0) ?: 'C';
+            $this->locale = Locale::getDefault();
         }
 
         return $this->locale;
